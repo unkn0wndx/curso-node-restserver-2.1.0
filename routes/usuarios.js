@@ -1,49 +1,50 @@
-
+//! Se guardan las rutas (URLs)
 const { Router } = require('express');
-const { check } = require('express-validator');
+const { check } = require('express-validator'); //? Valida data
 
+const { validarCampos } = require('../middlewares/validar-campos'); //* Modulo que valida la data
+const { esRoleValido, emailExiste, existeUsuarioPorID } = require('../helpers/db-validators'); //* Validaciones Personalizadas
 
-const { validarCampos } = require('../middlewares/validar-campos');
-const { esRoleValido, emailExiste, existeUsuarioPorId } = require('../helpers/db-validators');
-
-const { usuariosGet,
-        usuariosPut,
-        usuariosPost,
-        usuariosDelete,
-        usuariosPatch } = require('../controllers/usuarios');
+const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete, usuariosPatch } = require('../controllers/usuarios');
 
 const router = Router();
 
+//? Ruta GET
+router.get('/', usuariosGet)
 
-router.get('/', usuariosGet );
+//? Ruta POST
+//* The data is validated, before the post request is processed
+router.post('/',
+    [//* Valida los datos antes de hacer la solicitud 'POST'
+        check('nombre', 'El nombre es obligatorio').not().isEmpty(), //*Valida que haya un nombre
+        check('password', 'El password debe de ser mas de 6 letras').isLength({ min: 6 }), //* Valida si la contrase;a mide mas 6 caracteres
+        check('correo', 'El correo no es valido').isEmail(), //* Valida si el correo es valido
+        check('correo').custom(emailExiste),//* Valida si el correo ya existe
+        check('rol').custom(esRoleValido), //* Valida que el rol existe en la base de datos
+        validarCampos //* Valida cada uno de los middlewares de arriba e informara del error
+    ]
+    , usuariosPost);//* Si pasa los middlewares de arriba se publicaran los datos en la base de datos
 
-router.put('/:id',[
-    check('id', 'No es un ID válido').isMongoId(),
-    check('id').custom( existeUsuarioPorId ),
-    check('rol').custom( esRoleValido ), 
-    validarCampos
-],usuariosPut );
+//? Ruta PUT
+//* Update User
+router.put('/:id', //* El 'id' dado en el url sera extraido y despues sera validado para hacer la solicitud 'PUT' (Update Data)
+    [//* Valida los datos antes de hacer la solicitud 'PUT'
+        check('id', 'No es un ID valido').isMongoId(), //* Valida si es un id de mongo
+        check('id').custom(existeUsuarioPorID), //* Validación custom si el id existe en la base de datos
+        check('rol').custom(esRoleValido), //* Valida que el rol existe en la base de datos
+        validarCampos//* Valida cada uno de los middlewares de arriba e informara del error
+    ]
+    , usuariosPut) //* Si pasa los middlewares de arriba se actualizaran los datos en la base de datos
 
-router.post('/',[
-    check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-    check('password', 'El password debe de ser más de 6 letras').isLength({ min: 6 }),
-    check('correo', 'El correo no es válido').isEmail(),
-    check('correo').custom( emailExiste ),
-    // check('rol', 'No es un rol válido').isIn(['ADMIN_ROLE','USER_ROLE']),
-    check('rol').custom( esRoleValido ), 
-    validarCampos
-], usuariosPost );
+//? Ruta DELETE
+router.delete('/:id',
+    [
+        check('id', 'No es un ID valido').isMongoId(), //* Valida si es un id de mongo
+        check('id').custom(existeUsuarioPorID), //* Validación custom si el id existe en la base de datos
+        validarCampos//* Valida cada uno de los middlewares de arriba e informara del error
+    ]
+    , usuariosDelete)
 
-router.delete('/:id',[
-    check('id', 'No es un ID válido').isMongoId(),
-    check('id').custom( existeUsuarioPorId ),
-    validarCampos
-],usuariosDelete );
-
-router.patch('/', usuariosPatch );
-
-
-
-
+router.patch('/', usuariosPatch)
 
 module.exports = router;

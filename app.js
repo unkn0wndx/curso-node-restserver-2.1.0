@@ -1,9 +1,10 @@
-require('dotenv').config();
-const Server = require('./models/server');
+require('dotenv').config();//* Establece las variables de entorno del archivo '.env'
+const Server = require('./models/server');//* Se importa la clase server
 
 
-const server = new Server();
+console.clear();//* Limpia consola
+
+const server = new Server();//* Se instancia
 
 
-
-server.listen();
+server.listen();//* Se inicia el servidor

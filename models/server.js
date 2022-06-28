@@ -1,56 +1,54 @@
-const express = require('express');
-const cors = require('cors');
+//! Configuración del Servidor Express
 
-const { dbConnection } = require('../database/config');
+const express = require('express')//* Importar framework 'Express'
+const cors = require('cors');//* Importar cors module
+const { dbConnection } = require('../database/config');//* Conexion a la base de datos
 
-class Server {
+class Server { //? Clase
 
-    constructor() {
-        this.app  = express();
-        this.port = process.env.PORT;
-        this.usuariosPath = '/api/usuarios';
+  constructor() { //? Atributos
+    this.app = express();//* Haciendo uso de express
+    this.port = process.env.PORT; //* el atributo 'port' toma el valor de la variable de entorno 'PORT'
+    this.usuariosPath = '/api/usuarios'; //
 
-        // Conectar a base de datos
-        this.conectarDB();
+    //? Conectar a la base de datos
+    this.conectarDB();
 
-        // Middlewares
-        this.middlewares();
+    //? Middlewares
+    this.middlewares();
 
-        // Rutas de mi aplicación
-        this.routes();
-    }
+    //? Rutas de mi aplicación
+    this.routes();
+  }
 
-    async conectarDB() {
-        await dbConnection();
-    }
+  //* Conexión a la base de datos
+  async conectarDB() {
+    await dbConnection();
+  }
 
+  middlewares() {//? Método
+    //? CORS
+    this.app.use(cors()); //* CORS is a node. js package for providing a Connect/Express middleware that can be used to enable CORS with various options.
 
-    middlewares() {
+    //? Lectura y parseo del body
+    this.app.use(express.json());
 
-        // CORS
-        this.app.use( cors() );
+    //? Directorio publico
+    this.app.use(express.static('public'));//? Ruta '/'
+  }
 
-        // Lectura y parseo del body
-        this.app.use( express.json() );
+  routes() { //? Método // Rutas
 
-        // Directorio Público
-        this.app.use( express.static('public') );
+    this.app.use(this.usuariosPath, require('../routes/usuarios'));
 
-    }
+  }
 
-    routes() {
-        this.app.use( this.usuariosPath, require('../routes/usuarios'));
-    }
-
-    listen() {
-        this.app.listen( this.port, () => {
-            console.log('Servidor corriendo en puerto', this.port );
-        });
-    }
+  listen() { //? Método
+    this.app.listen(this.port, () => {//! Establecer puerto server
+      console.log('listening on port ' + this.port);
+    })
+  }
 
 }
 
-
-
-
-module.exports = Server;
+module.exports = Server;//* Se exporta el constructor o clase 'Server'
