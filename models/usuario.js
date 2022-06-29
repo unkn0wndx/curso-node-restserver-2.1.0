@@ -38,7 +38,12 @@ const UsuarioSchema = Schema({ //? Modelo o Esquema de la Coleccion Usuarios
 
 //* Cuando el registro de la data sea exitoso, no imprimira la "contrase;a" y "__v" 
 UsuarioSchema.methods.toJSON = function (req, res) {
-  const { __v, password, ...usuario } = this.toObject(req, res);
+
+  //? Se separa la informacion traida de la base de datos, los campos '__v', 'password' y '_id' seran ignorados en la respuesta del servidor
+  const { __v, password, _id,...usuario } = this.toObject(req, res);
+
+  usuario.uid = _id;
+
   return usuario; //* retorna un nuevo array sin "password" and "__v"
 }
 

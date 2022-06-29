@@ -1,4 +1,5 @@
-//! Validar Campos
+//! Detención de errores en validación
+//* Cualquier tipo de error pasara por la siguiente función y sera notificado al usuario 
 const { validationResult } = require('express-validator');
 
 const validarCampos = (req, res, next) => {

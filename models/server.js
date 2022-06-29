@@ -9,7 +9,9 @@ class Server { //? Clase
   constructor() { //? Atributos
     this.app = express();//* Haciendo uso de express
     this.port = process.env.PORT; //* el atributo 'port' toma el valor de la variable de entorno 'PORT'
-    this.usuariosPath = '/api/usuarios'; //
+
+    this.usuariosPath = '/api/usuarios'; //? Ruta CRUD
+    this.authPath = '/api/auth';//? Ruta de Autenticaciones de usuarios
 
     //? Conectar a la base de datos
     this.conectarDB();
@@ -37,10 +39,10 @@ class Server { //? Clase
     this.app.use(express.static('public'));//? Ruta '/'
   }
 
-  routes() { //? Método // Rutas
+  routes() { //? Método // Rutas Definidas
+    this.app.use(this.authPath, require('../routes/auth'));
 
     this.app.use(this.usuariosPath, require('../routes/usuarios'));
-
   }
 
   listen() { //? Método

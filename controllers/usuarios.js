@@ -80,15 +80,15 @@ const usuariosDelete = async (req, res) => {//? DELETE
 
   const { id } = req.params;
 
-  //* Fisicamente borramos el usuario
+  const uid = req.uid;
+
+  //^ Fisicamente borramos el usuario, pero no se tiene que hacer eso
   // const usuario = await Usuario.findByIdAndDelete(id); //* Encuentra el usuario y lo elimina
 
-  //* No elimina el usuario, solo cambia su 'estado' para que el la solicitud 'GET' no sea retornado
+  //^ No elimina el usuario, solo cambia su 'estado' para que el la solicitud 'GET' no sea retornado
   const usuario = await Usuario.findByIdAndUpdate(id, { estado: false });
 
-  res.json({
-    usuario
-  })
+  res.json({usuario});
 }
 
 

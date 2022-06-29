@@ -1,8 +1,13 @@
 //! Se guardan las rutas (URLs)
+
+//? Node Packages -->
 const { Router } = require('express');
 const { check } = require('express-validator'); //? Valida data
 
-const { validarCampos } = require('../middlewares/validar-campos'); //* Modulo que valida la data
+//^ '../middlewares/index' es igual a '../middlewares', ya que la ruta apuntara siempre al 'index.js'
+//? Middlewares -->
+const {validarCampos, validarJWT, tieneRole, esAdminRole} = require('../middlewares'); 
+
 const { esRoleValido, emailExiste, existeUsuarioPorID } = require('../helpers/db-validators'); //* Validaciones Personalizadas
 
 const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete, usuariosPatch } = require('../controllers/usuarios');
@@ -39,6 +44,9 @@ router.put('/:id', //* El 'id' dado en el url sera extraido y despues sera valid
 //? Ruta DELETE
 router.delete('/:id',
     [
+        validarJWT, //* Primer valida el 'JSON WEB TOKEN'
+        //esAdminRole,//* Valida el rol del usuario
+        tieneRole('ADMIN_ROLE', 'USER_ROLE'),//* Valida que rol del usuario sea igual a los mandados como argumentos 
         check('id', 'No es un ID valido').isMongoId(), //* Valida si es un id de mongo
         check('id').custom(existeUsuarioPorID), //* Validación custom si el id existe en la base de datos
         validarCampos//* Valida cada uno de los middlewares de arriba e informara del error
