@@ -1,39 +1,34 @@
-//! Controlador (Funcion) para la autentificación de usuarios
-
 const { response } = require('express');
 const bcryptjs = require('bcryptjs')
 
-const Usuario = require('../models/usuario'); //? Modelo 'Usuario' de la base de datos
+const Usuario = require('../models/usuario');
 
-const { generarJWT } = require('../helpers/generar-jwt'); //? Generador de JWT
+const { generarJWT } = require('../helpers/generar-jwt');
 const { googleVerify } = require('../helpers/google-verify');
 
 
 const login = async (req, res = response) => {
 
-  const { correo, password } = req.body; //* Extrae datos del body o peticion 'POST'
+  const { correo, password } = req.body;
 
   try {
 
-    //Verificar si el email existe
-    //? Buscara el correo en la base de datos
+    // Verificar si el email existe
     const usuario = await Usuario.findOne({ correo });
-
-    //?Verificara que el email existe en la base de datos
     if (!usuario) {
-      return res.status(400).json({ msg: 'Usuario / Password no son correctos - correo' });
+      return res.status(400).json({
+        msg: 'Usuario / Password no son correctos - correo'
+      });
     }
 
-    //? Verifica si el usuario es valido 
-    //Si el usuario esta activo
+    // SI el usuario está activo
     if (!usuario.estado) {
       return res.status(400).json({
         msg: 'Usuario / Password no son correctos - estado: false'
       });
     }
 
-    //Verificar la contraseña
-    //? Verificara si la contraseña dada es igual a la almacenada en la base de datos
+    // Verificar la contraseña
     const validPassword = bcryptjs.compareSync(password, usuario.password);
     if (!validPassword) {
       return res.status(400).json({
@@ -41,13 +36,13 @@ const login = async (req, res = response) => {
       });
     }
 
-    //Generar el JWT
-    //? Generamos el JWT transformando el callback en una funcion asincrona 'asycn'
+    // Generar el JWT
     const token = await generarJWT(usuario.id);
 
     res.json({
-      usuario, token
-    });
+      usuario,
+      token
+    })
 
   } catch (error) {
     console.log(error)
@@ -55,9 +50,11 @@ const login = async (req, res = response) => {
       msg: 'Hable con el administrador'
     });
   }
+
 }
 
-const googleSignIn = async (req, res = response) => {
+
+const googleSignin = async (req, res = response) => {
 
   const { id_token } = req.body;
 
@@ -96,11 +93,20 @@ const googleSignIn = async (req, res = response) => {
     });
 
   } catch (error) {
+
     res.status(400).json({
       msg: 'Token de Google no es válido'
     })
+
   }
+
+
+
 }
 
 
-module.exports = { login, googleSignIn };
+
+module.exports = {
+  login,
+  googleSignin
+}

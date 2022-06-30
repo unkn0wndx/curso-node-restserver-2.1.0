@@ -17,7 +17,9 @@ const googleVerify = async( idToken = '' ) => {
         } = ticket.getPayload();
   
   return { nombre, img, correo };
+
 }
+
 
 module.exports = {
     googleVerify
